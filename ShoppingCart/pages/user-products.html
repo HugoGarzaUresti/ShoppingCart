@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+  <style>
+     body{
+        background-image: linear-gradient(to top, #778899 , #2F4F4F);
+        height: 100%;
+        margin: 12px;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+      }
+
+      html{
+        height: 100%;
+      }
+
+      h1{
+        font-size: 300%;
+        font-family: "Lucida Console", Monaco, monospace;
+        color: white;
+      }
+
+      h2{
+        color: white;
+      }
+
+      h3{
+        color: #F8F8FF;
+        font-size: 200%;
+      }
+
+      ul{
+        padding: 40px;
+      }
+
+      li{
+        color: #F0F8FF;
+        text-transform: capitalize;
+        font-size: 150%;
+        font-family: "Lucida Console", Monaco, monospace;
+      }
+
+      button{
+        background-color: #1E90FF;
+        border: none;
+        color: white;
+        padding: 12px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 12px;
+        transition-duration: 0.4s;
+      }
+
+      button:hover{
+        opacity: 0.5;
+      }
+
+      .addButton{
+        background-color: #9932CC;
+        border: none;
+        color: #F0F8FF;
+        padding: 12px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 20px;
+        transition-duration: 0.4s;
+      }
+
+      .removeButton{
+        background-color: #8B0000;
+        border: none;
+        color: #F0F8FF;
+        padding: 12px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 12px;
+        transition-duration: 0.4s;
+      }
+
+      .reloc{
+        background-color: #F0FFFF;
+        border: none;
+        color: black;
+        padding: 12px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 12px;
+        transition-duration: 0.4s;
+      }
+
+    </style>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Product-Store</title>
+    </head>
+    <body>
+      <h1>Store</h1>
+
+      <h2>Products</h2>
+      <ul id="cart">
+      </ul>
+      <button id = "back" class = "reloc"> Back</button>
+      <button id = "Cart" class = "reloc"> Cart</button>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+      backBtn = document.getElementById("back");
+      backBtn.addEventListener("click", ()=>{
+        window.location.replace('http://127.0.0.1:3000/');
+      });
+
+       cartBtn = document.getElementById("Cart");
+      cartBtn.addEventListener("click", ()=>{
+        window.location.replace('http://127.0.0.1:3000/cart');
+      });
+      const userId = '<%= user.id %>';
+      const cart = document.getElementById("cart");
+      const totalLabel = document.getElementById("total");
+        
+      products = [];
+      class Product{
+        constructor(i, n, p, b){
+          this.id = i;
+          this.name = n;
+          this.price = p;
+          this.brand = b;
+        }
+      }
+
+      var getProducts = new XMLHttpRequest();
+      getProducts.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200 && this.responseText != "") {
+      //console.log(this.responseText);
+      var productData = this.responseText;
+      var productData = JSON.parse(productData);
+      productData.forEach(prod => {
+        let product = new Product(prod._id, prod.name, parseFloat(prod.price), prod.brand);
+        products.push(product);
+      });		
+        updateList();
+      } 
+      }
+      getProducts.open("GET", "http://127.0.0.1:3000/products/all", true);
+      getProducts.send();
+
+
+      function updateList(){
+        products.forEach(product =>{
+          let li = document.createElement('li');
+          let namePart = document.createElement('span');
+          namePart.appendChild(document.createTextNode(product.name));
+          let pricePart = document.createElement('span');
+          pricePart.appendChild(document.createTextNode(`$${product.price}`));
+          let brandPart = document.createElement('span');
+          brandPart.appendChild(document.createTextNode(`  ${product.brand}  `));
+
+          // complete the remove functionality
+          btnAdd = document.createElement("button");
+          btnAdd.appendChild(document.createTextNode("Add"));
+          btnAdd.addEventListener("click", ()=>{
+            const formData = new FormData();
+            formData.append('productId', product.id);
+            axios.post(`http://127.0.0.1:3000/product/add/${userId}/${product.id}`, formData)
+            .then(response => {
+                console.log(response);
+            })
+            .catch(error => {
+                console.log(error.response.data)
+                alert(`Problem when adding product ${error.response.data}`);
+            });
+
+          });
+        
+
+            let eguzz = document.createElement('br');
+            li.appendChild(namePart);
+            li.appendChild(document.createTextNode(': '));
+            li.appendChild(pricePart);
+            li.appendChild(document.createElement('br'));
+            li.appendChild(document.createTextNode('Brand: '));
+            li.appendChild(brandPart);
+            li.appendChild(eguzz);
+            li.appendChild(btnAdd);
+
+            li.appendChild(document.createElement('br'));
+            li.appendChild(document.createElement('br'));
+
+            cart.appendChild(li);
+        });
+      }
+
+      function validate(name, price){
+        if (name === '') return 'Product name is needed';
+        if (price === '') return `Price is needed for ${name}`;
+        if (isNaN(price)) return 'A valid price is needed';
+        return '';
+      }
+    </script>
+
+    
+</body>
+</html>

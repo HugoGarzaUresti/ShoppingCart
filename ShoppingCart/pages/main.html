@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <style>
+     body{
+      background-image: linear-gradient(to top, #778899 , #2F4F4F);
+      height: 100%;
+      margin: 12px;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      }
+
+    html{
+      height: 100%;
+    }
+
+    h1{
+      font-size: 300%;
+      font-family: "Lucida Console", Monaco, monospace;
+      color: white;
+    }
+
+    h2{
+      color: white;
+    }
+
+    h3{
+      color: #F8F8FF;
+      font-size: 200%;
+    }
+
+    ul{
+      padding: 40px;
+    }
+
+    li{
+      color: #F0F8FF;
+      text-transform: capitalize;
+      font-size: 150%;
+      font-family: "Lucida Console", Monaco, monospace;
+    }
+
+    input[type = button]{
+      background-color: #1E90FF;
+      border: none;
+      color: white;
+      padding: 12px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      transition-duration: 0.4s;
+    }
+
+     input[type = button]:hover{
+        opacity: 0.5;
+    }
+
+    input[type = submit]{
+      background-color: #F0FFFF;
+      border: none;
+      color: black;
+      padding: 12px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      transition-duration: 0.4s;
+    }
+
+    input[type = submit]:hover{
+        opacity: 0.5;
+    }
+
+    form{
+        color: white;
+        font-size: 140%;
+    }
+
+    input[type=text]{
+        padding: 12px 20px;
+        margin: 6px 0;
+        box-sizing: border-box;
+        transition: width 0.4s ease-in-out;
+        font-size: 100%;
+    }
+
+     input[type=email]{
+        padding: 12px 20px;
+        margin: 6px 0;
+        box-sizing: border-box;
+        transition: width 0.4s ease-in-out;
+        font-size: 100%;
+    }
+
+     input[type=password]{
+        padding: 12px 20px;
+        margin: 6px 0;
+        box-sizing: border-box;
+        transition: width 0.4s ease-in-out;
+        font-size: 100%;
+    }
+
+    .addButton{
+      background-color: #9932CC;
+      border: none;
+      color: #F0F8FF;
+      padding: 12px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 20px;
+      transition-duration: 0.4s;
+    }
+
+    .removeButton{
+      background-color: #8B0000;
+      border: none;
+      color: #F0F8FF;
+      padding: 12px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 12px;
+      transition-duration: 0.4s;
+    }
+
+  </style>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Main page</title>
+</head>
+<body>
+    <input type="button" value="Cart" id="Cart"/>
+    <input type="button" value="Products" id="Products"/>
+    <h1>Welcome</h1>
+
+    <h2>Edit your details</h2>
+    <form>
+        <label for="txtName">Name:</label>
+        <br>
+        <input type="text" id="txtName"><br>
+
+        <label for="txtEmail">Email:</label>
+        <br>
+        <input type="email" id="txtEmail"><br>
+
+        <label for="txtPassword">Password:</label>
+        <br>
+        <input type="password" id="txtPassword"><br>
+
+        <label for="imgAvatar">Current avatar:</label>
+        <br>
+        <img id="imgAvatar"><br>
+        <br>
+
+
+        <label for="avatarImage">Update avatar image</label>
+        <input type="file" id="avatarImage" name="avatarImage" value="Select image">
+        <br>
+        <input type="submit" id="submit" value="Edit user"> 
+    </form>
+    <br>
+    <input type="button" value="Logout" id="logout" />
+    
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>       
+        const btnLogout = document.getElementById('logout');
+        const btnCart = document.getElementById('Cart');
+        const btnProducts = document.getElementById('Products');
+        const userId = '<%= user.id %>';
+        //console.log(userId);
+        
+        const txtName = document.getElementById('txtName');
+        const txtEmail = document.getElementById('txtEmail');
+        const txtPassword = document.getElementById('txtPassword');
+        const imgAvatar = document.getElementById('imgAvatar');
+
+        btnLogout.addEventListener("click", (e) => {
+            axios.post('http://127.0.0.1:3000/logout') 
+            .then(response => {
+                console.log(response);
+                alert(`You have been logged out, you are being redirected`);
+                window.location.replace('http://127.0.0.1:3000/');
+            })
+            .catch(error => {
+                console.log(error.response.data)
+                alert(`Error: ${error.response.data}`);
+            });
+        });
+
+        btnCart.addEventListener("click", (e) => {
+            window.location.replace('http://127.0.0.1:3000/cart');
+        });
+        btnProducts.addEventListener("click", (e) => {
+            window.location.replace('http://127.0.0.1:3000/products');
+        });
+
+        loadUserData();
+        
+        const btnSubmit = document.getElementById('submit');
+        btnSubmit.addEventListener("click", (e) => {
+            e.preventDefault();
+            
+            let name = txtName.value.trim();
+            let email = txtEmail.value.trim();
+            let password = txtPassword.value;
+
+            if (name === '') { alert('Input your name'); return; }
+            if (email ==='') { alert('Input your email'); return; }
+            if (password ==='') { alert('Input your password'); return; }
+            
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('email', email);
+            formData.append('password', password);
+            const files = avatarImage.files;
+            formData.append('avatar', files[0])
+
+            axios.post(`http://127.0.0.1:3000/users/${userId}`, formData)
+            .then(response => {
+                console.log(response);
+                alert(`User updated successfully`);
+            })
+            .catch(error => {
+                console.log(error.response.data)
+                alert(`Problem when updating user ${error.response.data}`);
+            });
+        });
+
+        function loadUserData(){
+            axios.get(`http://127.0.0.1:3000/users/${userId}`)
+            .then(response => {
+                console.log(response);
+                let user = response.data
+                txtName.value = user.name;
+                txtEmail.value = user.email;
+                txtPassword.value = '';
+                if (user.avatar && user.avatar.data){
+                  let stringValue = "data:image/jpg;base64," + (user.avatar.data);
+                  //console.log(stringValue);
+                  imgAvatar.setAttribute('height', 200);
+                  imgAvatar.setAttribute('width', 300);
+                  imgAvatar.setAttribute('src', stringValue);
+                  imgAvatar.setAttribute('alt', 'Red dot');
+                }
+            })
+            .catch(error => {
+                console.log(error);
+                btnSubmit.disabled = true;
+                alert(`Problem when loading data for movie ${error.response.data}`);
+            });
+        }
+        
+    </script>
+</body>
+</html>
